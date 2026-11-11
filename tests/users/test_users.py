@@ -159,3 +159,125 @@ def test_get_me_invalid_token(
     assert res.status_code == 401
     assert res_json["error_code"] == "ERR_007"
     assert res_json["error_msg"] == "INVALID TOKEN"
+
+
+# TEST PATCH /api/users/me
+def test_update_me(
+    client: TestClient,
+    access_token: str
+):
+    auth_header = {"Authorization": f"Bearer {access_token}"}
+    req = {
+        "nickname": "와플이",
+        "address": "서울시 관악구",
+        "phone_number": "010-1234-5678"
+    }
+
+    res = client.patch("/api/users/me", json=req, headers=auth_header)
+    res_json = res.json()
+
+    assert res.status_code == 200
+    assert res_json["nickname"] == "와플이"
+    assert res_json["address"] == "서울시 관악구"
+    assert res_json["phone_number"] == "010-1234-5678"
+    assert res_json["email"] == "test1234@snu.ac.kr"
+
+    # 진짜 저장됐는지 다시 조회
+    res = client.get("/api/users/me", headers=auth_header)
+    assert res.json()["nickname"] == "와플이"
+
+def test_update_me_partial(
+    client: TestClient,
+    access_token: str
+):
+    auth_header = {"Authorization": f"Bearer {access_token}"}
+    client.patch("/api/users/me", json={"nickname": "와플이"}, headers=auth_header)
+
+    res = client.patch("/api/users/me", json={"address": "서울시 강남구"}, headers=auth_header)
+    res_json = res.json()
+
+    assert res.status_code == 200
+    assert res_json["address"] == "서울시 강남구"
+    assert res_json["nickname"] == "와플이"  # 안 보낸 값은 그대로
+
+def test_update_me_empty_body(
+    client: TestClient,
+    access_token: str
+):
+    auth_header = {"Authorization": f"Bearer {access_token}"}
+
+    res = client.patch("/api/users/me", json={}, headers=auth_header)
+    res_json = res.json()
+
+    assert res.status_code == 400
+    assert res_json["error_code"] == "ERR_002"
+    assert res_json["error_msg"] == "MISSING REQUIRED FIELDS"
+
+def test_update_me_long_nickname(
+    client: TestClient,
+    access_token: str
+):
+    auth_header = {"Authorization": f"Bearer {access_token}"}
+
+    res = client.patch("/api/users/me", json={"nickname": "a" * 21}, headers=auth_header)
+    res_json = res.json()
+
+    assert res.status_code == 400
+    assert res_json["error_code"] == "ERR_003"
+    assert res_json["error_msg"] == "INVALID FIELD FORMAT"
+
+def test_update_me_long_address(
+    client: TestClient,
+    access_token: str
+):
+    auth_header = {"Authorization": f"Bearer {access_token}"}
+
+    res = client.patch("/api/users/me", json={"address": "a" * 101}, headers=auth_header)
+    res_json = res.json()
+
+    assert res.status_code == 400
+    assert res_json["error_code"] == "ERR_003"
+
+def test_update_me_invalid_phone_number(
+    client: TestClient,
+    access_token: str
+):
+    auth_header = {"Authorization": f"Bearer {access_token}"}
+
+    res = client.patch("/api/users/me", json={"phone_number": "01012345678"}, headers=auth_header)
+    res_json = res.json()
+
+    assert res.status_code == 400
+    assert res_json["error_code"] == "ERR_003"
+
+def test_update_me_without_header(
+    client: TestClient
+):
+    res = client.patch("/api/users/me", json={"nickname": "와플이"})
+    res_json = res.json()
+
+    assert res.status_code == 401
+    assert res_json["error_code"] == "ERR_005"
+
+def test_update_me_invalid_header(
+    client: TestClient,
+    access_token: str
+):
+    invalid_header = {"Authorization": f"{access_token}"}
+
+    res = client.patch("/api/users/me", json={"nickname": "와플이"}, headers=invalid_header)
+    res_json = res.json()
+
+    assert res.status_code == 400
+    assert res_json["error_code"] == "ERR_006"
+
+def test_update_me_invalid_token(
+    client: TestClient
+):
+    auth_header = {"Authorization": "Bearer invalidtoken"}
+
+    res = client.patch("/api/users/me", json={"nickname": "와플이"}, headers=auth_header)
+    res_json = res.json()
+
+    assert res.status_code == 401
+    assert res_json["error_code"] == "ERR_007"
