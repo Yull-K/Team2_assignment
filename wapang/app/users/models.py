@@ -1,6 +1,6 @@
 from uuid6 import uuid7
 from sqlalchemy import BigInteger, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from wapang.database.common import Base
 
 
@@ -13,3 +13,5 @@ class User(Base):
     nickname: Mapped[str | None] = mapped_column(String(30))
     address: Mapped[str | None] = mapped_column(String(150))
     phone_number: Mapped[str | None] = mapped_column(String(20))
+
+    # orders: Mapped[list["Order"]] = relationship(back_populates="user")
