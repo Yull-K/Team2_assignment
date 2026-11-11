@@ -24,3 +24,21 @@ class UserRepository:
     
     def get_user_by_email(self, email: str) -> User | None:
         return self.session.scalar(select(User).where(User.email == email))
+
+    def update_user(
+        self,
+        user: User,
+        nickname: str | None,
+        address: str | None,
+        phone_number: str | None,
+    ) -> User:
+        if nickname is not None:
+            user.nickname = nickname
+        if address is not None:
+            user.address = address
+        if phone_number is not None:
+            user.phone_number = phone_number
+
+        self.session.flush()
+
+        return user
