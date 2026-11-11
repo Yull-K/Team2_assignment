@@ -20,3 +20,13 @@ class UserService:
 
     def get_user_by_id(self, user_id: str) -> User | None:
         return self.user_repository.get_user_by_id(user_id)
+
+    def update_user(
+        self,
+        user_id: str,
+        nickname: str | None,
+        address: str | None,
+        phone_number: str | None,
+    ) -> User:
+        user = self.user_repository.get_user_by_id(user_id)
+        return self.user_repository.update_user(user, nickname, address, phone_number)

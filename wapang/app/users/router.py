@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, status
 
 from wapang.app.auth.utils import login_with_header
 from wapang.app.users.models import User
-from wapang.app.users.schemas import UserSignupRequest, UserResponse
+from wapang.app.users.schemas import UserSignupRequest, UserUpdateRequest, UserResponse
 from wapang.app.users.services import UserService
 
 user_router = APIRouter()
@@ -29,3 +29,17 @@ def get_me(
     user: Annotated[User, Depends(login_with_header)],
     ) -> UserResponse:
     return UserResponse.model_validate(user)
+
+@user_router.patch("/me")
+def update_me(
+    update_request: UserUpdateRequest,
+    user: Annotated[User, Depends(login_with_header)],
+    user_service: Annotated[UserService, Depends()],
+) -> UserResponse:
+    updated_user = user_service.update_user(
+        user.id,
+        update_request.nickname,
+        update_request.address,
+        update_request.phone_number,
+    )
+    return UserResponse.model_validate(updated_user)
