@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="790" viewBox="0 0 1240 790" role="img" aria-labelledby="title desc">
+<title id="title">Wapang ERD</title><desc id="desc">Users own at most one store and make many orders. Stores sell many products. Orders contain products through order_items.</desc>
+<defs><style>
+text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#172033}.title{font-size:27px;font-weight:700}.sub{font-size:14px;fill:#536079}.head{font-size:17px;font-weight:700;fill:#fff}.field{font-size:14px}.note{font-size:12px;fill:#536079}.entity{fill:#fff;stroke:#b9c5d8;stroke-width:1.5;rx:12}.bar{fill:#284b80;rx:12}.key{font-weight:700;fill:#254c86}.rel{stroke:#526985;stroke-width:2;fill:none}.label{font-size:12px;fill:#36465f;font-weight:600}
+</style><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526985"/></marker></defs>
+<rect width="1240" height="790" fill="#f6f8fc"/>
+<text x="40" y="48" class="title">Wapang database ERD</text><text x="40" y="74" class="sub">PK: primary key · FK: foreign key · UNIQUE FK enforces one store per owner</text>
+<!-- relationships -->
+<path class="rel" marker-end="url(#arrow)" d="M330 224 C390 224 400 154 465 154"/><text x="360" y="174" class="label">owns · 0..1</text>
+<path class="rel" marker-end="url(#arrow)" d="M650 232 L650 304"/><text x="660" y="275" class="label">sells · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M240 334 C240 435 215 454 215 500"/><text x="249" y="430" class="label">places · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M490 576 L405 576"/><text x="417" y="560" class="label">has · 1..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M700 610 L700 575"/><text x="772" y="558" class="label">references · 1</text>
+<!-- users -->
+<g transform="translate(50 120)"><rect class="entity" width="280" height="215"/><rect class="bar" width="280" height="40"/><text class="head" x="16" y="27">users</text>
+<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field" x="16" y="94">email: VARCHAR(100), UNIQUE</text><text class="field" x="16" y="119">hashed_password: VARCHAR(100)</text><text class="field" x="16" y="144">nickname: VARCHAR(30), NULL</text><text class="field" x="16" y="169">address: VARCHAR(150), NULL</text><text class="field" x="16" y="194">phone_number: VARCHAR(20), NULL</text></g>
+<!-- stores -->
+<g transform="translate(465 100)"><rect class="entity" width="370" height="250"/><rect class="bar" width="370" height="40"/><text class="head" x="16" y="27">stores</text>
+<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field key" x="16" y="94">FK  owner_user_id: VARCHAR(36), UNIQUE</text><text class="field" x="16" y="119">name: VARCHAR(100)</text><text class="field" x="16" y="144">address: VARCHAR(255)</text><text class="field" x="16" y="169">email: VARCHAR(100)</text><text class="field" x="16" y="194">phone_number: VARCHAR(20)</text><text class="field" x="16" y="219">delivery_fee: INTEGER</text></g>
+<!-- products -->
+<g transform="translate(510 390)"><rect class="entity" width="280" height="185"/><rect class="bar" width="280" height="40"/><text class="head" x="16" y="27">products</text>
+<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field key" x="16" y="94">FK  store_id: VARCHAR(36)</text><text class="field" x="16" y="119">name: VARCHAR(100)</text><text class="field" x="16" y="144">price: INTEGER</text><text class="field" x="16" y="169">stock: INTEGER</text></g>
+<!-- orders -->
+<g transform="translate(50 500)"><rect class="entity" width="355" height="185"/><rect class="bar" width="355" height="40"/><text class="head" x="16" y="27">orders</text>
+<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field key" x="16" y="94">FK  user_id: VARCHAR(36)</text><text class="field" x="16" y="119">status: ENUM(CANCELED, ORDERED, COMPLETE)</text><text class="field" x="16" y="144">total_price: INTEGER</text><text class="note" x="16" y="169">Status default: ORDERED</text></g>
+<!-- order_items -->
+<g transform="translate(490 610)"><rect class="entity" width="300" height="150"/><rect class="bar" width="300" height="40"/><text class="head" x="16" y="27">order_items (association)</text>
+<text class="field key" x="16" y="69">PK, FK  order_id: VARCHAR(36)</text><text class="field key" x="16" y="94">PK, FK  product_id: VARCHAR(36)</text><text class="field" x="16" y="119">quantity: INTEGER · unit_price: INTEGER</text><text class="note" x="16" y="140">Captures quantity and price at checkout</text></g>
+<text x="835" y="540" class="note">One order ↔ many products</text><text x="835" y="560" class="note">via order_items; composite PK prevents</text><text x="835" y="580" class="note">duplicate product rows per order.</text>
+</svg>
