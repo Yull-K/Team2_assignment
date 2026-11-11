@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="960" viewBox="0 0 1420 960" role="img" aria-labelledby="title desc">
+<title id="title">Wapang ERD</title><desc id="desc">Entity relationship diagram for users, stores, items, orders, order items, and blocked tokens.</desc>
+<defs><style>
+*{box-sizing:border-box}text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#172033}.title{font-size:28px;font-weight:700}.subtitle{font-size:14px;fill:#536079}.entity{fill:#fff;stroke:#aebbd0;stroke-width:1.5;rx:12}.bar{fill:#284b80;rx:12}.header{font-size:17px;font-weight:700;fill:#fff}.field{font-size:13.3px}.key{font-weight:700;fill:#234b86}.note{font-size:12px;fill:#526079}.rel{stroke:#536b8a;stroke-width:2;fill:none}.reltext{font-size:12px;font-weight:600;fill:#40536e}.dash{stroke-dasharray:5 5}
+</style><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#536b8a"/></marker></defs>
+<rect width="1420" height="960" fill="#f6f8fc"/>
+<text x="42" y="48" class="title">Wapang database ERD</text><text x="42" y="74" class="subtitle">PK primary key · FK foreign key · UQ unique · NN not null · Check constraints are noted where defined</text>
+<!-- relationship lines -->
+<path class="rel" marker-end="url(#arrow)" d="M345 220 C405 220 410 155 470 155"/><text x="366" y="175" class="reltext">owns · 0..1 store</text>
+<path class="rel" marker-end="url(#arrow)" d="M655 305 L655 385"/><text x="666" y="352" class="reltext">sells · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M210 310 C210 440 195 500 195 560"/><text x="218" y="450" class="reltext">places · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M505 655 L420 655"/><text x="430" y="638" class="reltext">has · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M655 585 L655 600"/><text x="820" y="594" class="reltext">item · 0..1</text>
+<path class="rel" marker-end="url(#arrow)" d="M815 790 L870 790 L870 350 L840 350"/><text x="878" y="555" class="reltext">store · 1</text>
+<!-- users -->
+<g transform="translate(50 115)"><rect class="entity" width="295" height="225"/><rect class="bar" width="295" height="40"/><text class="header" x="16" y="27">users</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field" x="16" y="92">UQ NN  email: VARCHAR(100)</text><text class="field" x="16" y="116">NN  hashed_password: VARCHAR(100)</text><text class="field" x="16" y="140">nickname: VARCHAR(20), NULL</text><text class="field" x="16" y="164">address: VARCHAR(100), NULL</text><text class="field" x="16" y="188">phone_number: VARCHAR(20), NULL</text><text class="note" x="16" y="212">email also indexed</text></g>
+<!-- stores -->
+<g transform="translate(470 100)"><rect class="entity" width="370" height="265"/><rect class="bar" width="370" height="40"/><text class="header" x="16" y="27">stores</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK UQ NN  user_id: VARCHAR(36) → users.id</text><text class="field" x="16" y="116">UQ NN  name: VARCHAR(20)</text><text class="field" x="16" y="140">NN  address: VARCHAR(100)</text><text class="field" x="16" y="164">UQ NN  email: VARCHAR(100)</text><text class="field" x="16" y="188">UQ NN  phone_number: VARCHAR(20)</text><text class="field" x="16" y="212">NN  delivery_fee: BIGINT</text><text class="note" x="16" y="238">name length ≥ 3 · delivery_fee ≥ 0</text></g>
+<!-- items -->
+<g transform="translate(510 385)"><rect class="entity" width="295" height="200"/><rect class="bar" width="295" height="40"/><text class="header" x="16" y="27">items</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK NN  store_id: VARCHAR(36) → stores.id</text><text class="field" x="16" y="116">NN  name: VARCHAR(50)</text><text class="field" x="16" y="140">NN  price: BIGINT</text><text class="field" x="16" y="164">NN  stock: BIGINT</text><text class="note" x="16" y="187">name length ≥ 2 · price, stock ≥ 0</text></g>
+<!-- orders -->
+<g transform="translate(50 560)"><rect class="entity" width="370" height="200"/><rect class="bar" width="370" height="40"/><text class="header" x="16" y="27">orders</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK NN  user_id: VARCHAR(36) → users.id</text><text class="field" x="16" y="116">NN  status: ENUM(CANCELED, ORDERED, COMPLETE)</text><text class="field" x="16" y="140">NN  total_price: BIGINT</text><text class="note" x="16" y="168">default status: ORDERED</text></g>
+<!-- order items -->
+<g transform="translate(505 600)"><rect class="entity" width="310" height="220"/><rect class="bar" width="310" height="40"/><text class="header" x="16" y="27">order_items</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK NN  order_id → orders.id</text><text class="field key" x="16" y="116">FK NULL  item_id → items.id</text><text class="field" x="16" y="140">NN  item_name: VARCHAR(50)</text><text class="field" x="16" y="164">NN  price: BIGINT · quantity: BIGINT</text><text class="field key" x="16" y="188">FK NN  store_id → stores.id</text><text class="note" x="16" y="211">UQ(order_id, item_id) · quantity ≥ 1 · price ≥ 0</text></g>
+<!-- blocked tokens -->
+<g transform="translate(920 120)"><rect class="entity" width="370" height="135"/><rect class="bar" width="370" height="40"/><text class="header" x="16" y="27">blocked_tokens</text>
+<text class="field key" x="16" y="68">PK  token: VARCHAR(512)</text><text class="field" x="16" y="92">NN  expired_at: DATETIME</text><text class="note" x="16" y="116">auth support table · no FK relation</text></g>
+<text x="880" y="605" class="note">Each order item points to one order.</text><text x="880" y="625" class="note">Product FK becomes NULL if item is deleted;</text><text x="880" y="645" class="note">item name, price and store remain as snapshots.</text>
+<text x="50" y="900" class="note">Association table records purchased item quantity and checkout price. Item and store names exposed to APIs use synonyms; stored column names are name.</text>
+</svg>
