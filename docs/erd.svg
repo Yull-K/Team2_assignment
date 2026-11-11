@@ -1,30 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="790" viewBox="0 0 1240 790" role="img" aria-labelledby="title desc">
-<title id="title">Wapang ERD</title><desc id="desc">Users own at most one store and make many orders. Stores sell many products. Orders contain products through order_items.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1420" height="960" viewBox="0 0 1420 960" role="img" aria-labelledby="title desc">
+<title id="title">Wapang ERD</title><desc id="desc">Entity relationship diagram for users, stores, items, orders, order items, and blocked tokens.</desc>
 <defs><style>
-text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#172033}.title{font-size:27px;font-weight:700}.sub{font-size:14px;fill:#536079}.head{font-size:17px;font-weight:700;fill:#fff}.field{font-size:14px}.note{font-size:12px;fill:#536079}.entity{fill:#fff;stroke:#b9c5d8;stroke-width:1.5;rx:12}.bar{fill:#284b80;rx:12}.key{font-weight:700;fill:#254c86}.rel{stroke:#526985;stroke-width:2;fill:none}.label{font-size:12px;fill:#36465f;font-weight:600}
-</style><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526985"/></marker></defs>
-<rect width="1240" height="790" fill="#f6f8fc"/>
-<text x="40" y="48" class="title">Wapang database ERD</text><text x="40" y="74" class="sub">PK: primary key · FK: foreign key · UNIQUE FK enforces one store per owner</text>
-<!-- relationships -->
-<path class="rel" marker-end="url(#arrow)" d="M330 224 C390 224 400 154 465 154"/><text x="360" y="174" class="label">owns · 0..1</text>
-<path class="rel" marker-end="url(#arrow)" d="M650 232 L650 304"/><text x="660" y="275" class="label">sells · 0..*</text>
-<path class="rel" marker-end="url(#arrow)" d="M240 334 C240 435 215 454 215 500"/><text x="249" y="430" class="label">places · 0..*</text>
-<path class="rel" marker-end="url(#arrow)" d="M490 576 L405 576"/><text x="417" y="560" class="label">has · 1..*</text>
-<path class="rel" marker-end="url(#arrow)" d="M700 610 L700 575"/><text x="772" y="558" class="label">references · 1</text>
+*{box-sizing:border-box}text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#172033}.title{font-size:28px;font-weight:700}.subtitle{font-size:14px;fill:#536079}.entity{fill:#fff;stroke:#aebbd0;stroke-width:1.5;rx:12}.bar{fill:#284b80;rx:12}.header{font-size:17px;font-weight:700;fill:#fff}.field{font-size:13.3px}.key{font-weight:700;fill:#234b86}.note{font-size:12px;fill:#526079}.rel{stroke:#536b8a;stroke-width:2;fill:none}.reltext{font-size:12px;font-weight:600;fill:#40536e}.dash{stroke-dasharray:5 5}
+</style><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#536b8a"/></marker></defs>
+<rect width="1420" height="960" fill="#f6f8fc"/>
+<text x="42" y="48" class="title">Wapang database ERD</text><text x="42" y="74" class="subtitle">PK primary key · FK foreign key · UQ unique · NN not null · Check constraints are noted where defined</text>
+<!-- relationship lines -->
+<path class="rel" marker-end="url(#arrow)" d="M345 220 C405 220 410 155 470 155"/><text x="366" y="175" class="reltext">owns · 0..1 store</text>
+<path class="rel" marker-end="url(#arrow)" d="M655 305 L655 385"/><text x="666" y="352" class="reltext">sells · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M210 310 C210 440 195 500 195 560"/><text x="218" y="450" class="reltext">places · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M505 655 L420 655"/><text x="430" y="638" class="reltext">has · 0..*</text>
+<path class="rel" marker-end="url(#arrow)" d="M655 585 L655 600"/><text x="820" y="594" class="reltext">item · 0..1</text>
+<path class="rel" marker-end="url(#arrow)" d="M815 790 L870 790 L870 350 L840 350"/><text x="878" y="555" class="reltext">store · 1</text>
 <!-- users -->
-<g transform="translate(50 120)"><rect class="entity" width="280" height="215"/><rect class="bar" width="280" height="40"/><text class="head" x="16" y="27">users</text>
-<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field" x="16" y="94">email: VARCHAR(100), UNIQUE</text><text class="field" x="16" y="119">hashed_password: VARCHAR(100)</text><text class="field" x="16" y="144">nickname: VARCHAR(30), NULL</text><text class="field" x="16" y="169">address: VARCHAR(150), NULL</text><text class="field" x="16" y="194">phone_number: VARCHAR(20), NULL</text></g>
+<g transform="translate(50 115)"><rect class="entity" width="295" height="225"/><rect class="bar" width="295" height="40"/><text class="header" x="16" y="27">users</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field" x="16" y="92">UQ NN  email: VARCHAR(100)</text><text class="field" x="16" y="116">NN  hashed_password: VARCHAR(100)</text><text class="field" x="16" y="140">nickname: VARCHAR(20), NULL</text><text class="field" x="16" y="164">address: VARCHAR(100), NULL</text><text class="field" x="16" y="188">phone_number: VARCHAR(20), NULL</text><text class="note" x="16" y="212">email also indexed</text></g>
 <!-- stores -->
-<g transform="translate(465 100)"><rect class="entity" width="370" height="250"/><rect class="bar" width="370" height="40"/><text class="head" x="16" y="27">stores</text>
-<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field key" x="16" y="94">FK  owner_user_id: VARCHAR(36), UNIQUE</text><text class="field" x="16" y="119">name: VARCHAR(100)</text><text class="field" x="16" y="144">address: VARCHAR(255)</text><text class="field" x="16" y="169">email: VARCHAR(100)</text><text class="field" x="16" y="194">phone_number: VARCHAR(20)</text><text class="field" x="16" y="219">delivery_fee: INTEGER</text></g>
-<!-- products -->
-<g transform="translate(510 390)"><rect class="entity" width="280" height="185"/><rect class="bar" width="280" height="40"/><text class="head" x="16" y="27">products</text>
-<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field key" x="16" y="94">FK  store_id: VARCHAR(36)</text><text class="field" x="16" y="119">name: VARCHAR(100)</text><text class="field" x="16" y="144">price: INTEGER</text><text class="field" x="16" y="169">stock: INTEGER</text></g>
+<g transform="translate(470 100)"><rect class="entity" width="370" height="265"/><rect class="bar" width="370" height="40"/><text class="header" x="16" y="27">stores</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK UQ NN  user_id: VARCHAR(36) → users.id</text><text class="field" x="16" y="116">UQ NN  name: VARCHAR(20)</text><text class="field" x="16" y="140">NN  address: VARCHAR(100)</text><text class="field" x="16" y="164">UQ NN  email: VARCHAR(100)</text><text class="field" x="16" y="188">UQ NN  phone_number: VARCHAR(20)</text><text class="field" x="16" y="212">NN  delivery_fee: BIGINT</text><text class="note" x="16" y="238">name length ≥ 3 · delivery_fee ≥ 0</text></g>
+<!-- items -->
+<g transform="translate(510 385)"><rect class="entity" width="295" height="200"/><rect class="bar" width="295" height="40"/><text class="header" x="16" y="27">items</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK NN  store_id: VARCHAR(36) → stores.id</text><text class="field" x="16" y="116">NN  name: VARCHAR(50)</text><text class="field" x="16" y="140">NN  price: BIGINT</text><text class="field" x="16" y="164">NN  stock: BIGINT</text><text class="note" x="16" y="187">name length ≥ 2 · price, stock ≥ 0</text></g>
 <!-- orders -->
-<g transform="translate(50 500)"><rect class="entity" width="355" height="185"/><rect class="bar" width="355" height="40"/><text class="head" x="16" y="27">orders</text>
-<text class="field key" x="16" y="69">PK  id: VARCHAR(36)</text><text class="field key" x="16" y="94">FK  user_id: VARCHAR(36)</text><text class="field" x="16" y="119">status: ENUM(CANCELED, ORDERED, COMPLETE)</text><text class="field" x="16" y="144">total_price: INTEGER</text><text class="note" x="16" y="169">Status default: ORDERED</text></g>
-<!-- order_items -->
-<g transform="translate(490 610)"><rect class="entity" width="300" height="150"/><rect class="bar" width="300" height="40"/><text class="head" x="16" y="27">order_items (association)</text>
-<text class="field key" x="16" y="69">PK, FK  order_id: VARCHAR(36)</text><text class="field key" x="16" y="94">PK, FK  product_id: VARCHAR(36)</text><text class="field" x="16" y="119">quantity: INTEGER · unit_price: INTEGER</text><text class="note" x="16" y="140">Captures quantity and price at checkout</text></g>
-<text x="835" y="540" class="note">One order ↔ many products</text><text x="835" y="560" class="note">via order_items; composite PK prevents</text><text x="835" y="580" class="note">duplicate product rows per order.</text>
+<g transform="translate(50 560)"><rect class="entity" width="370" height="200"/><rect class="bar" width="370" height="40"/><text class="header" x="16" y="27">orders</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK NN  user_id: VARCHAR(36) → users.id</text><text class="field" x="16" y="116">NN  status: ENUM(CANCELED, ORDERED, COMPLETE)</text><text class="field" x="16" y="140">NN  total_price: BIGINT</text><text class="note" x="16" y="168">default status: ORDERED</text></g>
+<!-- order items -->
+<g transform="translate(505 600)"><rect class="entity" width="310" height="220"/><rect class="bar" width="310" height="40"/><text class="header" x="16" y="27">order_items</text>
+<text class="field key" x="16" y="68">PK NN  id: VARCHAR(36)</text><text class="field key" x="16" y="92">FK NN  order_id → orders.id</text><text class="field key" x="16" y="116">FK NULL  item_id → items.id</text><text class="field" x="16" y="140">NN  item_name: VARCHAR(50)</text><text class="field" x="16" y="164">NN  price: BIGINT · quantity: BIGINT</text><text class="field key" x="16" y="188">FK NN  store_id → stores.id</text><text class="note" x="16" y="211">UQ(order_id, item_id) · quantity ≥ 1 · price ≥ 0</text></g>
+<!-- blocked tokens -->
+<g transform="translate(920 120)"><rect class="entity" width="370" height="135"/><rect class="bar" width="370" height="40"/><text class="header" x="16" y="27">blocked_tokens</text>
+<text class="field key" x="16" y="68">PK  token: VARCHAR(512)</text><text class="field" x="16" y="92">NN  expired_at: DATETIME</text><text class="note" x="16" y="116">auth support table · no FK relation</text></g>
+<text x="880" y="605" class="note">Each order item points to one order.</text><text x="880" y="625" class="note">Product FK becomes NULL if item is deleted;</text><text x="880" y="645" class="note">item name, price and store remain as snapshots.</text>
+<text x="50" y="900" class="note">Association table records purchased item quantity and checkout price. Item and store names exposed to APIs use synonyms; stored column names are name.</text>
 </svg>
