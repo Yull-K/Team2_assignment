@@ -28,6 +28,16 @@ class OrderCreateRequest(BaseModel):
         if len(item_ids) != len(set(item_ids)):
             raise InvalidFormatException()
         return v
+    
+
+class OrderStatusUpdateRequest(BaseModel):
+    status: str
+
+    @field_validator("status", mode="after")
+    def validate_status(cls, v):
+        if v not in ("CANCELED", "COMPLETE"):
+            raise InvalidFormatException()
+        return v
 
 
 # ---------- 응답 ----------

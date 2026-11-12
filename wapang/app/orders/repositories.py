@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from wapang.app.items.models import Item
-from wapang.app.orders.models import Order, OrderItem
+from wapang.app.orders.models import Order, OrderItem, OrderStatus
 from wapang.database.connection import get_db_session
 
 
@@ -43,4 +43,12 @@ class OrderRepository:
         self.session.add(order)
         self.session.flush()
 
+        return order
+
+    def get_order_by_id(self, order_id: str) -> Order | None:
+        return self.session.get(Order, order_id)
+
+    def update_order_status(self, order: Order, status: OrderStatus) -> Order:
+        order.status = status
+        self.session.flush()
         return order

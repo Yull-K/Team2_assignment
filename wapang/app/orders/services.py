@@ -2,8 +2,14 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from wapang.app.orders.exceptions import ItemNotFoundException, NotEnoughStockException
-from wapang.app.orders.models import Order
+from wapang.app.orders.exceptions import (
+    InvalidOrderStatusException,
+    ItemNotFoundException,
+    NotEnoughStockException,
+    NotYourOrderException,
+    OrderNotFoundException,
+)
+from wapang.app.orders.models import Order, OrderStatus
 from wapang.app.orders.repositories import OrderRepository
 from wapang.app.orders.schemas import (
     OrderItemDetail,
@@ -79,3 +85,17 @@ class OrderService:
             total_price=order.total_price,
             status=order.status,
         )
+
+    def get_my_order(self, user_id: str, order_id: str) -> Order:
+        order = self.order_repository.get_order_by_id(order_id)
+        if order is None:
+            raise OrderNotFoundException()
+        if order.user_id != user_id:
+            raise NotYourOrderException()
+        return order
+
+    def update_order_status(self, user_id: str, order_id: str, status: str) -> None:
+        order = self.get_my_order(user_id, order_id)
+        if order.status != OrderStatus.ORDERED:
+            raise InvalidOrderStatusException()
+        self.order_repository.update_order_status(order, OrderStatus(status))

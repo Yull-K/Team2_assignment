@@ -144,3 +144,138 @@ def test_create_order_invalid_token(client: TestClient, items):
 
     assert res.status_code == 401
     assert res.json()["error_code"] == "ERR_007"
+    
+
+
+
+# ---------- 준비: 주문 1개 + 다른 유저 토큰 ----------
+@pytest.fixture
+def order_id(client: TestClient, access_token: str, items) -> str:
+    req = {
+        "items": [
+            {"item_id": items["waffle"].id, "quantity": 2},
+            {"item_id": items["choco"].id, "quantity": 1},
+        ]
+    }
+    res = client.post("/api/orders", json=req, headers=auth(access_token))
+    return res.json()["order_id"]
+
+
+@pytest.fixture
+def other_access_token(client: TestClient) -> str:
+    req = {"email": "other@snu.ac.kr", "password": "password123"}
+    client.post("/api/users", json=req)
+    res = client.post("/api/auth/tokens", json=req)
+    return res.json()["access_token"]
+
+
+# ---------- TEST GET /api/orders/{order_id} ----------
+def test_get_order(client: TestClient, access_token: str, order_id: str):
+    res = client.get(f"/api/orders/{order_id}", headers=auth(access_token))
+    res_json = res.json()
+
+    assert res.status_code == 200
+    assert res_json["order_id"] == order_id
+    assert res_json["total_price"] == 40500
+    assert len(res_json["details"]) == 2
+    assert res_json["status"] == "ORDERED"
+
+
+def test_get_order_not_found(client: TestClient, access_token: str):
+    res = client.get("/api/orders/no-such-order", headers=auth(access_token))
+
+    assert res.status_code == 404
+    assert res.json()["error_code"] == "ERR_019"
+
+
+def test_get_order_not_your_order(client: TestClient, order_id: str, other_access_token: str):
+    res = client.get(f"/api/orders/{order_id}", headers=auth(other_access_token))
+
+    assert res.status_code == 403
+    assert res.json()["error_code"] == "ERR_020"
+
+
+def test_get_order_without_header(client: TestClient, order_id: str):
+    res = client.get(f"/api/orders/{order_id}")
+
+    assert res.status_code == 401
+    assert res.json()["error_code"] == "ERR_005"
+
+
+# ---------- TEST PATCH /api/orders/{order_id} ----------
+def test_cancel_order(client: TestClient, access_token: str, order_id: str):
+    res = client.patch(
+        f"/api/orders/{order_id}", json={"status": "CANCELED"}, headers=auth(access_token)
+    )
+
+    assert res.status_code == 204
+    assert res.content == b""  # 본문 없음
+
+    # 진짜 바뀌었는지 다시 조회
+    res = client.get(f"/api/orders/{order_id}", headers=auth(access_token))
+    assert res.json()["status"] == "CANCELED"
+
+
+def test_complete_order(client: TestClient, access_token: str, order_id: str):
+    res = client.patch(
+        f"/api/orders/{order_id}", json={"status": "COMPLETE"}, headers=auth(access_token)
+    )
+
+    assert res.status_code == 204
+
+    res = client.get(f"/api/orders/{order_id}", headers=auth(access_token))
+    assert res.json()["status"] == "COMPLETE"
+
+
+def test_update_order_already_canceled(client: TestClient, access_token: str, order_id: str):
+    client.patch(
+        f"/api/orders/{order_id}", json={"status": "CANCELED"}, headers=auth(access_token)
+    )
+
+    res = client.patch(
+        f"/api/orders/{order_id}", json={"status": "COMPLETE"}, headers=auth(access_token)
+    )
+
+    assert res.status_code == 409
+    assert res.json()["error_code"] == "ERR_021"
+
+
+def test_update_order_invalid_status(client: TestClient, access_token: str, order_id: str):
+    res = client.patch(
+        f"/api/orders/{order_id}", json={"status": "ORDERED"}, headers=auth(access_token)
+    )
+
+    assert res.status_code == 400
+    assert res.json()["error_code"] == "ERR_003"
+
+
+def test_update_order_missing_status(client: TestClient, access_token: str, order_id: str):
+    res = client.patch(f"/api/orders/{order_id}", json={}, headers=auth(access_token))
+
+    assert res.status_code == 400
+    assert res.json()["error_code"] == "ERR_002"
+
+
+def test_update_order_not_found(client: TestClient, access_token: str):
+    res = client.patch(
+        "/api/orders/no-such-order", json={"status": "CANCELED"}, headers=auth(access_token)
+    )
+
+    assert res.status_code == 404
+    assert res.json()["error_code"] == "ERR_019"
+
+
+def test_update_order_not_your_order(client: TestClient, order_id: str, other_access_token: str):
+    res = client.patch(
+        f"/api/orders/{order_id}", json={"status": "CANCELED"}, headers=auth(other_access_token)
+    )
+
+    assert res.status_code == 403
+    assert res.json()["error_code"] == "ERR_020"
+
+
+def test_update_order_without_header(client: TestClient, order_id: str):
+    res = client.patch(f"/api/orders/{order_id}", json={"status": "CANCELED"})
+
+    assert res.status_code == 401
+    assert res.json()["error_code"] == "ERR_005"
