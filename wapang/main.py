@@ -10,6 +10,14 @@ from wapang.common.exceptions import (
     InvalidFormatException,
 )
 
+# SQLAlchemy가 모든 모델을 알 수 있도록 미리 불러오기
+import wapang.app.auth.models  # noqa: F401
+import wapang.app.users.models  # noqa: F401
+import wapang.app.stores.models  # noqa: F401
+import wapang.app.items.models  # noqa: F401
+import wapang.app.orders.models  # noqa: F401
+
+
 app = FastAPI()
 
 app.include_router(api_router, prefix="/api")
