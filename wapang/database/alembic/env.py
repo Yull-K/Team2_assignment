@@ -9,6 +9,9 @@ from alembic import context
 from wapang.database.common import Base
 import wapang.app.auth.models
 import wapang.app.users.models
+import wapang.app.orders.models
+import wapang.app.items.models
+import wapang.app.stores.models
 
 
 from wapang.database.settings import DB_SETTINGS
