@@ -28,7 +28,7 @@ class OrderCreateRequest(BaseModel):
         if len(item_ids) != len(set(item_ids)):
             raise InvalidFormatException()
         return v
-    
+
 
 class OrderStatusUpdateRequest(BaseModel):
     status: str
@@ -60,5 +60,11 @@ class StoreOrderDetail(BaseModel):
 class OrderResponse(BaseModel):
     order_id: str
     details: list[StoreOrderDetail]
+    total_price: int
+    status: OrderStatus
+
+
+class OrderSummaryResponse(BaseModel):
+    order_id: str
     total_price: int
     status: OrderStatus

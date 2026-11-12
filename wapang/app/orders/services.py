@@ -15,6 +15,7 @@ from wapang.app.orders.schemas import (
     OrderItemDetail,
     OrderItemRequest,
     OrderResponse,
+    OrderSummaryResponse,
     StoreOrderDetail,
 )
 
@@ -99,3 +100,14 @@ class OrderService:
         if order.status != OrderStatus.ORDERED:
             raise InvalidOrderStatusException()
         self.order_repository.update_order_status(order, OrderStatus(status))
+
+    def get_my_orders(self, user_id: str) -> list[OrderSummaryResponse]:
+        orders = self.order_repository.get_orders_by_user_id(user_id)
+        return [
+            OrderSummaryResponse(
+                order_id=order.id,
+                total_price=order.total_price,
+                status=order.status,
+            )
+            for order in orders
+        ]

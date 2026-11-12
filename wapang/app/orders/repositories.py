@@ -52,3 +52,10 @@ class OrderRepository:
         order.status = status
         self.session.flush()
         return order
+
+    def get_orders_by_user_id(self, user_id: str) -> list[Order]:
+        return list(
+            self.session.scalars(
+                select(Order).where(Order.user_id == user_id).order_by(Order.id)
+            )
+        )

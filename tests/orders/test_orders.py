@@ -31,6 +31,27 @@ def items(db_session: orm.Session) -> dict[str, Item]:
     return {"waffle": waffle, "choco": choco}
 
 
+# ---------- 준비: 주문 1개 + 다른 유저 토큰 ----------
+@pytest.fixture
+def order_id(client: TestClient, access_token: str, items) -> str:
+    req = {
+        "items": [
+            {"item_id": items["waffle"].id, "quantity": 2},
+            {"item_id": items["choco"].id, "quantity": 1},
+        ]
+    }
+    res = client.post("/api/orders", json=req, headers=auth(access_token))
+    return res.json()["order_id"]
+
+
+@pytest.fixture
+def other_access_token(client: TestClient) -> str:
+    req = {"email": "other@snu.ac.kr", "password": "password123"}
+    client.post("/api/users", json=req)
+    res = client.post("/api/auth/tokens", json=req)
+    return res.json()["access_token"]
+
+
 def auth(access_token: str) -> dict:
     return {"Authorization": f"Bearer {access_token}"}
 
@@ -144,29 +165,6 @@ def test_create_order_invalid_token(client: TestClient, items):
 
     assert res.status_code == 401
     assert res.json()["error_code"] == "ERR_007"
-    
-
-
-
-# ---------- 준비: 주문 1개 + 다른 유저 토큰 ----------
-@pytest.fixture
-def order_id(client: TestClient, access_token: str, items) -> str:
-    req = {
-        "items": [
-            {"item_id": items["waffle"].id, "quantity": 2},
-            {"item_id": items["choco"].id, "quantity": 1},
-        ]
-    }
-    res = client.post("/api/orders", json=req, headers=auth(access_token))
-    return res.json()["order_id"]
-
-
-@pytest.fixture
-def other_access_token(client: TestClient) -> str:
-    req = {"email": "other@snu.ac.kr", "password": "password123"}
-    client.post("/api/users", json=req)
-    res = client.post("/api/auth/tokens", json=req)
-    return res.json()["access_token"]
 
 
 # ---------- TEST GET /api/orders/{order_id} ----------
@@ -279,3 +277,62 @@ def test_update_order_without_header(client: TestClient, order_id: str):
 
     assert res.status_code == 401
     assert res.json()["error_code"] == "ERR_005"
+
+
+# ---------- TEST GET /api/users/me/orders ----------
+def test_get_my_orders_empty(client: TestClient, access_token: str):
+    res = client.get("/api/users/me/orders", headers=auth(access_token))
+
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_get_my_orders(client: TestClient, access_token: str, order_id: str):
+    res = client.get("/api/users/me/orders", headers=auth(access_token))
+    res_json = res.json()
+
+    assert res.status_code == 200
+    assert len(res_json) == 1
+    assert res_json[0]["order_id"] == order_id
+    assert res_json[0]["total_price"] == 40500
+    assert res_json[0]["status"] == "ORDERED"
+
+
+def test_get_my_orders_status_changed(client: TestClient, access_token: str, order_id: str):
+    client.patch(
+        f"/api/orders/{order_id}", json={"status": "CANCELED"}, headers=auth(access_token)
+    )
+
+    res = client.get("/api/users/me/orders", headers=auth(access_token))
+
+    assert res.status_code == 200
+    assert res.json()[0]["status"] == "CANCELED"
+
+
+def test_get_my_orders_only_mine(client: TestClient, order_id: str, other_access_token: str):
+    # 다른 유저는 내 주문이 안 보여야 함
+    res = client.get("/api/users/me/orders", headers=auth(other_access_token))
+
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_get_my_orders_without_header(client: TestClient):
+    res = client.get("/api/users/me/orders")
+
+    assert res.status_code == 401
+    assert res.json()["error_code"] == "ERR_005"
+
+
+def test_get_my_orders_invalid_header(client: TestClient, access_token: str):
+    res = client.get("/api/users/me/orders", headers={"Authorization": access_token})
+
+    assert res.status_code == 400
+    assert res.json()["error_code"] == "ERR_006"
+
+
+def test_get_my_orders_invalid_token(client: TestClient):
+    res = client.get("/api/users/me/orders", headers=auth("invalidtoken"))
+
+    assert res.status_code == 401
+    assert res.json()["error_code"] == "ERR_007"
