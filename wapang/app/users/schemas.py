@@ -77,16 +77,16 @@ class StoreAddRequest(BaseModel):
             raise InvalidFormatException()
         return v
 
-    @field_validator("delivaey_fee", mode="after")
+    @field_validator("delivery_fee", mode="after")
     def validate_delivery_fee(cls, v):
         if v < 0:
             raise InvalidFormatException()
         return v
     
 class StoreUpdateRequest(BaseModel):
-    email: EmailStr | None = None
     store_name: str | None = None
     address: str | None = None
+    email: EmailStr | None = None
     phone_number: str | None = None
     delivery_fee: int | None = None
 
