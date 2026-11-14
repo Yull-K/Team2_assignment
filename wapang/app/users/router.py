@@ -2,14 +2,16 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from wapang.app.auth.utils import login_with_header
-from wapang.app.orders.schemas import OrderSummaryResponse
-from wapang.app.orders.services import OrderService
+
 from wapang.app.users.models import User
+
 from wapang.app.users.schemas import UserSignupRequest, UserUpdateRequest, UserResponse
+from wapang.app.orders.schemas import OrderSummaryResponse
+
 from wapang.app.users.services import UserService
+from wapang.app.orders.services import OrderService
 
 user_router = APIRouter()
-
 
 @user_router.post("/", status_code=status.HTTP_201_CREATED)
 def signup(
@@ -52,3 +54,4 @@ def get_my_orders(
     order_service: Annotated[OrderService, Depends()],
 ) -> list[OrderSummaryResponse]:
     return order_service.get_my_orders(user.id)
+
