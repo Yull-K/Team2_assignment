@@ -43,6 +43,10 @@ class Item(Base):
     # API에서 item_name을 사용할 때 name과 연결
     item_name = synonym("name")
 
+    @property
+    def store_name(self) -> str:
+        return self.store.name
+
     store: Mapped["Store"] = relationship(back_populates="items")
     order_items: Mapped[list["OrderItem"]] = relationship(
         back_populates="item"
