@@ -1,0 +1,71 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Run tests
+        env:
+          ENV: test
+        run: uv run pytest
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/wapang:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/wapang:latest
+
+      - name: Migrate and deploy on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/wapang:${{ github.sha }}
+            docker pull "$IMAGE"
+            docker run --rm --env-file ~/wapang/.env.prod "$IMAGE" uv run --no-sync alembic upgrade head
+            docker rm -f wapang || true
+            docker run -d --name wapang --restart unless-stopped --env-file ~/wapang/.env.prod -p 80:8000 "$IMAGE"
+            docker image prune -f
+
+      - name: Health check
+        run: |
+          curl -fsS --retry 10 --retry-delay 3 --retry-all-errors http://${{ secrets.EC2_HOST }}/health
+
+      - name: Compare source hash
+        run: |
+          EXPECTED=$(python3 -c "import runpy; print(runpy.run_path('wapang/common/source_hash.py')['get_source_hash']())")
+          ACTUAL=$(curl -fsS http://${{ secrets.EC2_HOST }}/health | python3 -c "import sys, json; print(json.load(sys.stdin)['hash'])")
+          echo "expected=$EXPECTED"
+          echo "actual=$ACTUAL"
+          test "$EXPECTED" = "$ACTUAL"
